@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Template</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+</head>
+<body ng-app="app" class="container-style">
+<div s-table class="form-inline" count-url="/count" list-url="/list" s-cache>
+  <div class="col-sm-2" s-items-by-page></div>
+  <div class="col-sm-1" s-year-filter start="2000" end="2020"></div>
+  <div class="col-sm-2" s-month-filter></div>
+  <div class="col-sm-2" s-search></div>
+  <table class="table">
+    <thead>
+    <tr>
+      <td s-sort="id">{{'ID' | translate}}</td>
+      <td s-sort="value">{{'NAME' | translate}}</td>
+      <td>{{'EMAIL' | translate}}</td>
+      <td>{{'YEAR' | translate}}</td>
+      <td>{{'MONTH' | translate}}</td>
+      <td>{{'PLACE' | translate}}</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="data in vm.tableData">
+      <td>{{data._id}}</td>
+      <td>{{data.name}}</td>
+      <td>{{data.email}}</td>
+      <td>{{data.birthYear}}</td>
+      <td>{{data.birthMonth}}</td>
+      <td>{{data.birthPlace}}</td>
+    </tr>
+    </tbody>
+    <tfoot s-pagination>
+    </tfoot>
+  </table>
+</div>
+<script src="bower_components/jquery/dist/jquery.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-translate/angular-translate.js"></script>
+<script src="bower_components/ngstorage/ngStorage.js"></script>
+
+<script src="app.module.js"></script>
+<script src="translate.config.js"></script>
+<script src="table.js"></script>
+
+</body>
+</html>

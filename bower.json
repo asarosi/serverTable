@@ -1,0 +1,34 @@
+{
+  "name": "server-table",
+  "version": "0.0.1",
+  "authors": [
+    "Sárosi Árpád <sarosi.arpad@gmail.com>"
+  ],
+  "description": "Table component with server side based pagination.",
+  "main": "/table/table.js",
+  "moduleType": [
+    "amd",
+    "globals"
+  ],
+  "keywords": [
+    "table",
+    "server",
+    "pagination",
+    "filter"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "dependencies": {
+    "angular": "~1.4.8",
+    "angular-translate": "~2.8.1",
+    "bootstrap": "~3.3.6",
+    "ngstorage": "~0.3.10"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.8"
+  }
+}
