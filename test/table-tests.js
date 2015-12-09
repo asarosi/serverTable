@@ -12,45 +12,17 @@ describe('sTableController', function () {
 
     scope.countUrl = '/count';
     scope.listUrl = '/list';
-    scope.actualItemsByPage = 5;
 
     controller = $controller('STableController', {$scope: scope});
     controller.currentPage = 2;
+    controller.actualItemsByPage = 5;
   }));
 
   describe('getPageCount() tests', function () {
-    it('should get the page number and should not change current page value', function () {
+    it('should get the page number', function () {
       httpBackend.expect('GET',
         scope.countUrl)
         .respond(200, {numberOfRows: 10});
-
-      controller.getPageCount(false)
-        .then(function () {
-          assert.strictEqual(controller.currentPage, 2, 'Current page number should not change!');
-          assert.strictEqual(controller.numberOfPages, 2, 'Number of pages should be equals with 10/5 (2)!');
-        });
-
-      httpBackend.flush();
-
-    });
-    it('should get the page number and should change current page value to zero', function () {
-      httpBackend.expect('GET', scope.countUrl)
-        .respond(200, {numberOfRows: 10});
-
-      controller.getPageCount(true)
-        .then(function () {
-          assert.strictEqual(controller.currentPage, 0, 'Current page number be 0!');
-          assert.strictEqual(controller.numberOfPages, 2, 'Number of pages should be equals with 10/5 (2)!');
-        });
-
-      httpBackend.flush();
-
-    });
-    it('should get the page number with month filter', function () {
-      httpBackend.expect('GET', scope.countUrl + '?month=1')
-        .respond(200, {numberOfRows: 10});
-
-      controller.month = 1;
 
       controller.getPageCount()
         .then(function () {
