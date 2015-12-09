@@ -1,0 +1,16 @@
+{
+  "name": "angularExample",
+  "version": "0.0.1",
+  "homepage": "https://github.com/asarosi/serverTable",
+  "authors": [
+    "Sárosi Árpád <sarosi.arpad@gmail.com>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "angular": "~1.4.8",
+    "angular-translate": "~2.8.1",
+    "bootstrap": "~3.3.6",
+    "jquery": "~2.1.4",
+    "ngstorage": "~0.3.10"
+  }
+}

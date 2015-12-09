@@ -1,6 +1,7 @@
 {
   "name": "server-table",
   "version": "0.0.1",
+  "homepage": "https://github.com/asarosi/serverTable",
   "authors": [
     "Sárosi Árpád <sarosi.arpad@gmail.com>"
   ],
@@ -19,8 +20,7 @@
   "license": "MIT",
   "ignore": [
     "node_modules",
-    "bower_components",
-    "test"
+    "bower_components"
   ],
   "dependencies": {
     "angular": "~1.4.8",

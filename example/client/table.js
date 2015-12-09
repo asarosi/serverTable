@@ -32,7 +32,7 @@
       $templateCache.put('template/servertable/itemsByPage.html',
         '<div class="form-group">' +
         '<label for="itemsByPage">{{"ITEMS_BY_PAGE" | translate}}:</label>' +
-        '<select class="form-control" id="itemsByPage" ng-model="actualItemsByPage" ng-options="rows.value as rows.value for rows in vm.itemsByPage"></select>' +
+        '<select class="form-control" id="itemsByPage" ng-model="vm.actualItemsByPage" ng-options="rows.value as rows.value for rows in vm.itemsByPage"></select>' +
         '</div>'
       );
       $templateCache.put('template/servertable/yearFilter.html',
@@ -80,11 +80,116 @@
         {id: 12, value: 'DECEMBER'}
       ],
       countUrl: '/count',
-      listUrl: '/list'
+      listUrl: '/list',
+      sortUpIcon: 'glyphicon glyphicon-triangle-top',
+      sortBottomIcon: 'glyphicon glyphicon-triangle-bottom',
+      sortNoneIcon: '',
+      paginatorTemplateUrl: 'template/servertable/pagination.html',
+      itemsByPageTemplateUrl: 'template/servertable/itemsByPage.html',
+      yearFilterTemplateUrl: 'template/servertable/yearFilter.html',
+      monthFilterTemplateUrl: 'template/servertable/monthFilter.html',
+      searchFieldTemplateUrl: 'template/servertable/search.html'
     });
 
   angular.module('serverTable')
-    .controller('STableController', ['$scope', '$http', 'sTableConfig', function ($scope, $http, sTableConfig) {
+    .provider('sTable', ['sTableConfig', function (sTableConfig) {
+
+      var vm = this;
+
+      Object.defineProperties(vm, {
+        sortUpIcon: {
+          get: function () {
+            return sTableConfig.sortUpIcon
+          },
+          set: function (value) {
+            sTableConfig.sortUpIcon = value
+          }
+        },
+        sortBottomIcon: {
+          get: function () {
+            return sTableConfig.sortBottomIcon
+          },
+          set: function (value) {
+            sTableConfig.sortBottomIcon = value
+          }
+        },
+        sortNoneIcon: {
+          get: function () {
+            return sTableConfig.sortNoneIcon
+          },
+          set: function (value) {
+            sTableConfig.sortNoneIcon = value
+          }
+        },
+        paginatorTemplateUrl: {
+          get: function () {
+            return sTableConfig.paginatorTemplateUrl
+          },
+          set: function (value) {
+            sTableConfig.paginatorTemplateUrl = value
+          }
+        },
+        itemsByPageTemplateUrl: {
+          get: function () {
+            return sTableConfig.itemsByPageTemplateUrl
+          },
+          set: function (value) {
+            sTableConfig.itemsByPageTemplateUrl = value
+          }
+        },
+        yearFilterTemplateUrl: {
+          get: function () {
+            return sTableConfig.yearFilterTemplateUrl
+          },
+          set: function (value) {
+            sTableConfig.yearFilterTemplateUrl = value
+          }
+        },
+        monthFilterTemplateUrl: {
+          get: function () {
+            return sTableConfig.monthFilterTemplateUrl
+          },
+          set: function (value) {
+            sTableConfig.monthFilterTemplateUrl = value
+          }
+        },
+        searchFieldTemplateUrl: {
+          get: function () {
+            return sTableConfig.searchFieldTemplateUrl
+          },
+          set: function (value) {
+            sTableConfig.searchFieldTemplateUrl = value
+          }
+        }
+      });
+
+      vm.$get = [, function () {
+        return vm;
+      }];
+
+    }]);
+
+  angular.module('serverTable')
+    .factory('sTableService', ['$http', '$q', '$log', function ($http, $q, $log) {
+      return {
+        getDataFromServer: getDataFromServer
+      };
+
+      function getDataFromServer(url, query) {
+        return $http.get(url, {params: query})
+          .then(function (result) {
+            return result.data;
+          })
+          .catch(function (error) {
+            $log.error(error);
+            return $q.reject(error);
+          })
+      }
+
+    }]);
+
+  angular.module('serverTable')
+    .controller('STableController', ['$scope', '$http', 'sTableConfig', 'sTableService', function ($scope, $http, sTableConfig, sTableService) {
 
       var vm = this;
       vm.itemsByPage = sTableConfig.itemsByPage;
@@ -92,48 +197,49 @@
       vm.getListFromServer = getListFromServer;
       vm.getPageCount = getPageCount;
       vm.tableData = [];
-      vm.currentPage = 0;
       vm.numberOfPages = 0;
       vm.sort = {};
 
-      function getListFromServer() {
-        return $http.get($scope.listUrl,
-          {
-            params: {
-              itemsByPage: $scope.actualItemsByPage,
-              currentPage: vm.currentPage,
-              month: vm.month,
-              year: vm.year,
-              searchText: vm.searchText,
-              sort: vm.sort
-            }
-          })
-          .then(function (result) {
-            vm.tableData = result.data;
-          });
-      }
+      function getListFromServer(resetCurrentPage) {
 
-      function getPageCount(resetCurrentPage) {
         if (resetCurrentPage) {
           vm.currentPage = 0;
         }
-        return $http.get($scope.countUrl,
-          {
-            params: {
-              month: vm.month,
-              year: vm.year,
-              searchText: vm.searchText
-            }
-          })
+
+        var query = {
+          itemsByPage: vm.actualItemsByPage,
+          currentPage: vm.currentPage,
+          month: vm.month,
+          year: vm.year,
+          searchText: vm.searchText,
+          sort: vm.sort
+        };
+
+        return sTableService.getDataFromServer($scope.listUrl, query)
           .then(function (result) {
-            vm.numberOfPages = Math.ceil(result.data.numberOfRows / ($scope.actualItemsByPage || result.data.numberOfRows));
+            vm.tableData = result;
+          });
+      }
+
+      function getPageCount() {
+
+        var query = {
+          month: vm.month,
+          year: vm.year,
+          searchText: vm.searchText
+        };
+
+        return sTableService.getDataFromServer($scope.countUrl, query)
+          .then(function (result) {
+            var numberOfRows = result.numberOfRows;
+            vm.numberOfPages = Math.ceil(numberOfRows / (vm.actualItemsByPage || numberOfRows));
           });
       }
 
     }]);
 
   angular.module('serverTable')
-    .directive('sTable', ['sTableConfig', function (sTableConfig) {
+    .directive('sTable', ['sTableConfig', '$injector', function (sTableConfig, $injector) {
       return {
         restrict: 'A',
         controller: 'STableController',
@@ -146,11 +252,21 @@
           activate();
 
           function activate() {
-            ctrl.getPageCount(false)
+            setCurrentPage();
+
+            ctrl.getPageCount()
               .then(function () {
-                ctrl.getListFromServer();
+                ctrl.getListFromServer(false);
               });
           }
+
+          function setCurrentPage() {
+            if (scope.hasCache) {
+              var $localStorage = $injector.get('$localStorage');
+              ctrl.currentPage = $localStorage.currentPage || 0;
+            }
+          }
+
         }
       };
     }]);
@@ -161,13 +277,24 @@
         restrict: 'A',
         require: '^?sTable',
         templateUrl: function () {
-          return 'template/servertable/pagination.html';
+          return sTableConfig.paginatorTemplateUrl;
         },
         link: function (scope, element, attrs, ctrl) {
 
-          scope.actualItemsByPage = attrs.itemsByPage || sTableConfig.itemsByPage[1].value;
           scope.nextPage = nextPage;
           scope.previousPage = previousPage;
+
+          activate();
+
+          function activate() {
+            setItemsByPage();
+          }
+
+          function setItemsByPage() {
+            if (!ctrl.actualItemsByPage) {
+              ctrl.actualItemsByPage = attrs.itemsByPage || sTableConfig.itemsByPage[1].value;
+            }
+          }
 
           function nextPage() {
             ctrl.currentPage += 1;
@@ -177,10 +304,9 @@
             ctrl.currentPage -= 1;
           }
 
-          scope.$watch('vm.currentPage', function (newVal, oldVal) {
-            //if (newVal !== oldVal) {
-            ctrl.getListFromServer();
-            //}
+          scope.$watch('vm.currentPage', function () {
+            // TODO [sarpad] all watch calls the server at the first load
+            ctrl.getListFromServer(false);
           });
 
         }
@@ -193,24 +319,31 @@
         restrict: 'EA',
         require: '^?sTable',
         templateUrl: function () {
-          return 'template/servertable/itemsByPage.html';
+          return sTableConfig.itemsByPageTemplateUrl;
         },
         link: function (scope, element, attrs, ctrl) {
 
-          if (scope.hasCache) {
-            var $localStorage = $injector.get('$localStorage');
-            scope.actualItemsByPage = $localStorage.actualItemsByPage || sTableConfig.itemsByPage[0].value;
-          } else {
-            scope.actualItemsByPage = attrs.itemsByPage || sTableConfig.itemsByPage[0].value;
+          activate();
+
+          function activate() {
+            setItemsByPage();
           }
 
-          scope.$watch('actualItemsByPage', function (newVal, oldVal) {
-            //if (newVal !== oldVal) {
-            ctrl.getPageCount(true)
+          function setItemsByPage() {
+            if (scope.hasCache) {
+              var $localStorage = $injector.get('$localStorage');
+              ctrl.actualItemsByPage = $localStorage.actualItemsByPage || sTableConfig.itemsByPage[0].value;
+            } else {
+              ctrl.actualItemsByPage = attrs.itemsByPage || sTableConfig.itemsByPage[0].value;
+            }
+          }
+
+          scope.$watch('vm.actualItemsByPage', function () {
+            // TODO [sarpad] all watch calls the server at the first load
+            ctrl.getPageCount()
               .then(function () {
-                ctrl.getListFromServer();
+                ctrl.getListFromServer(true);
               });
-            //}
           });
 
         }
@@ -218,12 +351,12 @@
     }]);
 
   angular.module('serverTable')
-    .directive('sYearFilter', ['$injector', function ($injector) {
+    .directive('sYearFilter', ['$injector', 'sTableConfig', function ($injector, sTableConfig) {
       return {
         restrict: 'EA',
         require: '^?sTable',
         templateUrl: function () {
-          return 'template/servertable/yearFilter.html';
+          return sTableConfig.yearFilterTemplateUrl;
         },
         link: function (scope, element, attrs, ctrl) {
 
@@ -240,22 +373,28 @@
             return years;
           }
 
-          ctrl.years = initYears();
+          activate();
 
-          if (scope.hasCache) {
-            var $localStorage = $injector.get('$localStorage');
-            ctrl.year = $localStorage.year || new Date().getFullYear();
-          } else {
-            ctrl.year = ctrl.years[0].id;
+          function activate() {
+            ctrl.years = initYears();
+            setYear();
           }
 
-          scope.$watch('vm.year', function (newVal, oldVal) {
-            //if (newVal !== oldVal) {
-            ctrl.getPageCount(true)
+          function setYear() {
+            if (scope.hasCache) {
+              var $localStorage = $injector.get('$localStorage');
+              ctrl.year = $localStorage.year || new Date().getFullYear();
+            } else {
+              ctrl.year = ctrl.years[0].id;
+            }
+          }
+
+          scope.$watch('vm.year', function () {
+            // TODO [sarpad] all watch calls the server at the first load
+            ctrl.getPageCount()
               .then(function () {
-                ctrl.getListFromServer();
+                ctrl.getListFromServer(true);
               });
-            //}
           });
 
         }
@@ -268,24 +407,31 @@
         restrict: 'EA',
         require: '^?sTable',
         templateUrl: function () {
-          return 'template/servertable/monthFilter.html';
+          return sTableConfig.monthFilterTemplateUrl;
         },
         link: function (scope, element, attrs, ctrl) {
 
-          if (scope.hasCache) {
-            var $localStorage = $injector.get('$localStorage');
-            ctrl.month = $localStorage.month || sTableConfig.months[0].id;
-          } else {
-            ctrl.month = ctrl.months[0].id;
+          activate();
+
+          function activate() {
+            setMonth();
           }
 
-          scope.$watch('vm.month', function (newVal, oldVal) {
-            //if (newVal !== oldVal) {
-            ctrl.getPageCount(true)
+          function setMonth() {
+            if (scope.hasCache) {
+              var $localStorage = $injector.get('$localStorage');
+              ctrl.month = $localStorage.month || sTableConfig.months[0].id;
+            } else {
+              ctrl.month = ctrl.months[0].id;
+            }
+          }
+
+          scope.$watch('vm.month', function () {
+            // TODO [sarpad] all watch calls the server at the first load
+            ctrl.getPageCount()
               .then(function () {
-                ctrl.getListFromServer();
+                ctrl.getListFromServer(true);
               });
-            //}
           });
 
         }
@@ -299,7 +445,8 @@
         require: '^?sTable',
         link: function (scope) {
 
-          scope.$watchGroup(['vm.currentPage', 'actualItemsByPage', 'vm.month', 'vm.year'], function (newVal) {
+          scope.$watchGroup(['vm.currentPage', 'vm.actualItemsByPage', 'vm.month', 'vm.year'], function (newVal) {
+            // TODO [sarpad] currentPage cache not working
             $localStorage.currentPage = newVal[0];
             $localStorage.actualItemsByPage = newVal[1];
             $localStorage.month = newVal[2];
@@ -311,68 +458,78 @@
     }]);
 
   angular.module('serverTable')
-    .directive('sSearch', function () {
+    .directive('sSearch', ['sTableConfig', function (sTableConfig) {
       return {
         restrict: 'EA',
         require: '^?sTable',
         templateUrl: function () {
-          return 'template/servertable/search.html';
+          return sTableConfig.searchFieldTemplateUrl;
         },
         link: function (scope, element, attrs, ctrl) {
 
-          scope.$watch('vm.searchText', function (newVal, oldVal) {
-            //if (newVal !== oldVal) {
-            ctrl.getPageCount(true)
+          scope.$watch('vm.searchText', function () {
+            // TODO [sarpad] all watch calls the server at the first load
+            ctrl.getPageCount()
               .then(function () {
-                ctrl.getListFromServer();
+                ctrl.getListFromServer(true);
               });
-            //}
           });
 
         }
       };
-    });
+    }]);
 
   angular.module('serverTable')
-    .directive('sSort', function () {
+    .directive('sSort', ['sTableConfig', function (sTableConfig) {
       return {
         restrict: 'A',
         require: '^?sTable',
         link: function (scope, element, attrs, ctrl) {
 
+          var glyphicon_triangle_top = sTableConfig.sortUpIcon;
+          var glyphicon_triangle_bottom = sTableConfig.sortBottomIcon;
+          var glyphicon_none = sTableConfig.sortNoneIcon;
+
           var name = attrs.sSort;
-          var sortOrders = ['none', 'ascending', 'descending'];
-          var actualSort = sortOrders[0];
+
+          function resetSort() {
+            for (var key in ctrl.sort) {
+              if (ctrl.sort.hasOwnProperty(key) && key !== name) {
+                angular.element(document.querySelector('#' + key + '_sort'))[0].className = '';
+              }
+            }
+          }
 
           function sort() {
             var icon = element[0].children[0];
 
-            switch (actualSort) {
-              case 'ascending':
-                icon.className = 'glyphicon glyphicon-triangle-bottom';
-                actualSort = 'descending';
+            resetSort();
+            ctrl.sort = {};
+
+            switch (icon.className) {
+              case glyphicon_triangle_top:
+                icon.className = glyphicon_triangle_bottom;
+                ctrl.sort[name] = 'descending';
                 break;
-              case 'descending':
-                icon.className = '';
-                actualSort = 'none';
+              case glyphicon_triangle_bottom:
+                icon.className = glyphicon_none;
+                ctrl.sort[name] = 'none';
                 break;
-              case 'none':
-                icon.className = 'glyphicon glyphicon-triangle-top';
-                actualSort = 'ascending';
+              case glyphicon_none:
+                icon.className = glyphicon_triangle_top;
+                ctrl.sort[name] = 'ascending';
                 break;
             }
-
-            ctrl.sort[name] = actualSort;
-            ctrl.getListFromServer();
+            ctrl.getListFromServer(true);
           }
 
           element.bind('click', function () {
             sort();
           });
 
-          element.append('<i></i>');
+          element.append('<i id="' + name + '_sort"></i>');
           element.css('cursor', 'pointer');
         }
       };
-    });
+    }]);
 }));

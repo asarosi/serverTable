@@ -24,7 +24,11 @@
       'OCTOBER': 'Október',
       'NOVEMBER': 'November',
       'DECEMBER': 'December',
-      'SEARCH': 'Keresés'
+      'SEARCH': 'Keresés',
+      'ID': 'Azonosító',
+      'NAME': 'Név',
+      'EMAIL': 'E-mail cím',
+      'PLACE': 'Születési hely'
     });
 
     $translateProvider.preferredLanguage('hu');

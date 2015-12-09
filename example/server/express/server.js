@@ -40,6 +40,10 @@
       query.birthMonth = month;
     }
 
+    if (searchText) {
+      query.name = new RegExp('.*' + searchText + '.*');
+    }
+
     userModel.count(query, function (error, count) {
       res.status(200).send({numberOfRows: count});
     });
@@ -48,35 +52,50 @@
   // TODO [sarpad] finish the query
   app.get('/list', function (req, res) {
 
-    var limit = Number(req.query.itemsByPage);
-    var year = Number(req.query.year);
-    var month = Number(req.query.month);
-    var searchText = req.query.searchText;
+      var limit = Number(req.query.itemsByPage);
+      var year = Number(req.query.year);
+      var month = Number(req.query.month);
+      var searchText = req.query.searchText;
+      var sort = JSON.parse(req.query.sort);
 
-    var skipAndLimit = {};
+      var skipAndLimit = {};
 
-    if (limit) {
-      var skip = Number(req.query.currentPage) * limit;
-      skipAndLimit = {
-        skip: skip,
-        limit: limit
+      if (limit) {
+        var skip = Number(req.query.currentPage) * limit;
+        skipAndLimit = {
+          skip: skip,
+          limit: limit
+        }
       }
+
+      if (sort) {
+        for (var key in sort) {
+          if (sort.hasOwnProperty(key) && sort[key] !== 'none') {
+            skipAndLimit.sort = sort;
+          }
+        }
+      }
+
+      var query = {};
+
+      if (year) {
+        query.birthYear = year;
+      }
+
+      if (month) {
+        query.birthMonth = month;
+      }
+
+      if (searchText) {
+        query.name = new RegExp('.*' + searchText + '.*');
+      }
+
+      userModel.find(query, '', skipAndLimit, function (error, users) {
+        res.status(200).send(users);
+      });
+
     }
-
-    var query = {};
-
-    if (year) {
-      query.birthYear = year;
-    }
-
-    if (month) {
-      query.birthMonth = month;
-    }
-
-    userModel.find(query, '', skipAndLimit, function (error, users) {
-      res.status(200).send(users);
-    });
-
-  });
+  )
+  ;
 
 })();

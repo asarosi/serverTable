@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "main": "server.js",
-  "author": "S�rosi �rp�d",
+  "author": "Sárosi Árpád",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.14.1",
