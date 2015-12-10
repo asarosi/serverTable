@@ -102,6 +102,9 @@ getListFromServer              | itemsByPage | String           | Number of item
 getListFromServer              | currentPage | String           | Current page's number
 getListFromServer              | sort        | Object (as JSON) | Sort object, object will have one attribute, which name will be the value from the s-sort diractive, and the attribute's values can be the following [ascending, descending, none] 
 
+#What's next?
+This is only an alpha build for the component, so there are plenty of work to do. I want to make the filters more dynamical, make a scrollable paginator, which will call the server when while the user scrolling down. Now the table can work wit data comming from the server, but I want to make a fully client based solution too.
+
 #License
 
 The MIT License (MIT)
