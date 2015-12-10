@@ -15,7 +15,7 @@ bower install server-table
 ```
  
 #Usage
-![image about the table] (http://i.imgur.com/4A71ibU.png)
+![image about the table] (http://i.imgur.com/GWqC09U.png)
 Include into the HTML
 ```html
 <script src="bower_components/server-table/dist/table.min.js"></script>
@@ -91,6 +91,16 @@ sYearFilter | endYear        | end year                                         
 sSort directive always has to have a unique value, which will identify the actual row!
 
 #How it works?
+The client will call the server side once, a condition has changed. It will send every condition to the server as query parameters. The parameters are the following:
+
+Method                         | Name        | Type             | Description
+-------------------------------|-------------|------------------|------------
+getPageCount, getListFromServer| month       | String           | Month filter value (from 1 to 12)
+getPageCount, getListFromServer| year        | String           | Year filter value
+getPageCount, getListFromServer| searchText  | String           | Text from the search field
+getListFromServer              | itemsByPage | String           | Number of items by page
+getListFromServer              | currentPage | String           | Current page's number
+getListFromServer              | sort        | Object (as JSON) | Sort object, object will have one attribute, which name will be the value from the s-sort diractive, and the attribute's values can be the following [ascending, descending, none] 
 
 #License
 
