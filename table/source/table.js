@@ -37,13 +37,13 @@
       );
       $templateCache.put('template/servertable/yearFilter.html',
         '<div class="form-group">' +
-        '<label for="year">{{"YEAR" | translate}}:</label>' +
+        '<label for="year">{{"YEAR_FILTER" | translate}}:</label>' +
         '<select class="form-control" id="year" ng-model="vm.year" ng-options="year.id as year.value for year in vm.years"></select>' +
         '</div>'
       );
       $templateCache.put('template/servertable/monthFilter.html',
         '<div class="form-group">' +
-        '<label for="month">{{"MONTH" | translate}}:</label>' +
+        '<label for="month">{{"MONTH_FILTER" | translate}}:</label>' +
         '<select class="form-control" id="month" ng-model="vm.month" ng-options="month.id as month.value | translate for month in vm.months"></select>' +
         '</div>'
       );
@@ -81,8 +81,8 @@
       ],
       countUrl: '/count',
       listUrl: '/list',
-      sortUpIcon: 'glyphicon glyphicon-triangle-top',
-      sortBottomIcon: 'glyphicon glyphicon-triangle-bottom',
+      sortAscIcon: 'glyphicon glyphicon-triangle-top',
+      sortDescIcon: 'glyphicon glyphicon-triangle-bottom',
       sortNoneIcon: '',
       paginatorTemplateUrl: 'template/servertable/pagination.html',
       itemsByPageTemplateUrl: 'template/servertable/itemsByPage.html',
@@ -97,68 +97,68 @@
       var vm = this;
 
       Object.defineProperties(vm, {
-        sortUpIcon: {
+        sortAscIcon: {
           get: function () {
-            return sTableConfig.sortUpIcon
+            return sTableConfig.sortAscIcon;
           },
           set: function (value) {
-            sTableConfig.sortUpIcon = value
+            sTableConfig.sortAscIcon = value;
           }
         },
-        sortBottomIcon: {
+        sortDescIcon: {
           get: function () {
-            return sTableConfig.sortBottomIcon
+            return sTableConfig.sortDescIcon;
           },
           set: function (value) {
-            sTableConfig.sortBottomIcon = value
+            sTableConfig.sortDescIcon = value;
           }
         },
         sortNoneIcon: {
           get: function () {
-            return sTableConfig.sortNoneIcon
+            return sTableConfig.sortNoneIcon;
           },
           set: function (value) {
-            sTableConfig.sortNoneIcon = value
+            sTableConfig.sortNoneIcon = value;
           }
         },
         paginatorTemplateUrl: {
           get: function () {
-            return sTableConfig.paginatorTemplateUrl
+            return sTableConfig.paginatorTemplateUrl;
           },
           set: function (value) {
-            sTableConfig.paginatorTemplateUrl = value
+            sTableConfig.paginatorTemplateUrl = value;
           }
         },
         itemsByPageTemplateUrl: {
           get: function () {
-            return sTableConfig.itemsByPageTemplateUrl
+            return sTableConfig.itemsByPageTemplateUrl;
           },
           set: function (value) {
-            sTableConfig.itemsByPageTemplateUrl = value
+            sTableConfig.itemsByPageTemplateUrl = value;
           }
         },
         yearFilterTemplateUrl: {
           get: function () {
-            return sTableConfig.yearFilterTemplateUrl
+            return sTableConfig.yearFilterTemplateUrl;
           },
           set: function (value) {
-            sTableConfig.yearFilterTemplateUrl = value
+            sTableConfig.yearFilterTemplateUrl = value;
           }
         },
         monthFilterTemplateUrl: {
           get: function () {
-            return sTableConfig.monthFilterTemplateUrl
+            return sTableConfig.monthFilterTemplateUrl;
           },
           set: function (value) {
-            sTableConfig.monthFilterTemplateUrl = value
+            sTableConfig.monthFilterTemplateUrl = value;
           }
         },
         searchFieldTemplateUrl: {
           get: function () {
-            return sTableConfig.searchFieldTemplateUrl
+            return sTableConfig.searchFieldTemplateUrl;
           },
           set: function (value) {
-            sTableConfig.searchFieldTemplateUrl = value
+            sTableConfig.searchFieldTemplateUrl = value;
           }
         }
       });
@@ -330,11 +330,14 @@
           }
 
           function setItemsByPage() {
+
+            var defaultItemsByPage = sTableConfig.itemsByPage[1].value;
+
             if (scope.hasCache) {
               var $localStorage = $injector.get('$localStorage');
-              ctrl.actualItemsByPage = $localStorage.actualItemsByPage || sTableConfig.itemsByPage[0].value;
+              ctrl.actualItemsByPage = $localStorage.actualItemsByPage || defaultItemsByPage;
             } else {
-              ctrl.actualItemsByPage = attrs.itemsByPage || sTableConfig.itemsByPage[0].value;
+              ctrl.actualItemsByPage = attrs.itemsByPage || defaultItemsByPage;
             }
           }
 
@@ -486,8 +489,8 @@
         require: '^?sTable',
         link: function (scope, element, attrs, ctrl) {
 
-          var glyphicon_triangle_top = sTableConfig.sortUpIcon;
-          var glyphicon_triangle_bottom = sTableConfig.sortBottomIcon;
+          var glyphicon_triangle_top = sTableConfig.sortAscIcon;
+          var glyphicon_triangle_bottom = sTableConfig.sortDescIcon;
           var glyphicon_none = sTableConfig.sortNoneIcon;
 
           var name = attrs.sSort;
@@ -501,7 +504,7 @@
           }
 
           function sort() {
-            var icon = element[0].children[0];
+            var icon = element[0].children[1];
 
             resetSort();
             ctrl.sort = {};

@@ -7,21 +7,21 @@
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
 </head>
 <body ng-app="app" class="container-style">
-<div s-table class="form-inline" count-url="/count" list-url="/list" s-cache>
+<div s-table class="form-inline" count-url="/count" list-url="/list" s-cache style="margin-top:25px">
   <div class="col-sm-2" s-items-by-page></div>
-  <div class="col-sm-1" s-year-filter start="2000" end="2020"></div>
-  <div class="col-sm-2" s-month-filter></div>
-  <div class="col-sm-2" s-search></div>
-  {{actualItemsByPage}}
-  <table class="table">
+  <div class="col-sm-1 col-sm-offset-1" s-year-filter start="2000" end="2020"></div>
+  <div class="col-sm-2 col-sm-offset-2" s-month-filter></div>
+  <div class="col-sm-2 col-sm-offset-1" s-search></div>
+  <hr class="col-sm-12">
+  <table class="table table-striped">
     <thead>
     <tr>
-      <td s-sort="_id">{{'ID' | translate}}</td>
-      <td s-sort="name">{{'NAME' | translate}}</td>
-      <td s-sort="email">{{'EMAIL' | translate}}</td>
-      <td>{{'YEAR' | translate}}</td>
-      <td>{{'MONTH' | translate}}</td>
-      <td>{{'PLACE' | translate}}</td>
+      <td s-sort="_id"><b>{{'ID' | translate}}</b></td>
+      <td s-sort="name"><b>{{'NAME' | translate}}</b></td>
+      <td s-sort="email"><b>{{'EMAIL' | translate}}</b></td>
+      <td><b>{{'YEAR' | translate}}</b></td>
+      <td><b>{{'MONTH' | translate}}</b></td>
+      <td><b>{{'PLACE' | translate}}</b></td>
     </tr>
     </thead>
     <tbody>
@@ -34,7 +34,10 @@
       <td>{{data.birthPlace}}</td>
     </tr>
     </tbody>
-    <tfoot s-pagination>
+    <tfoot class="text-center">
+    <tr>
+      <td colspan="6" s-pagination></td>
+    </tr>
     </tfoot>
   </table>
 </div>
@@ -42,10 +45,10 @@
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-translate/angular-translate.js"></script>
 <script src="bower_components/ngstorage/ngStorage.js"></script>
+<script src="bower_components/server-table/table/dist/table.js"></script>
 
 <script src="app.module.js"></script>
 <script src="translate.config.js"></script>
-<script src="table.js"></script>
 
 </body>
 </html>
