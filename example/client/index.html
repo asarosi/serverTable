@@ -5,47 +5,50 @@
   <title>Template</title>
   <meta http-equiv="X-UA-Compatible" content="IE=Edge">
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="default.css">
 </head>
 <body ng-app="app" class="container-style">
 <div s-table class="form-inline" count-url="/count" list-url="/list" s-cache style="margin-top:25px">
   <div class="col-sm-2" s-items-by-page></div>
-  <div class="col-sm-1 col-sm-offset-1" s-year-filter start="2000" end="2020"></div>
+  <div class="col-sm-2" s-year-filter start="2000" end="2020"></div>
   <div class="col-sm-2 col-sm-offset-2" s-month-filter></div>
   <div class="col-sm-2 col-sm-offset-1" s-search></div>
-  <hr class="col-sm-12">
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <td s-sort="_id"><b>{{'ID' | translate}}</b></td>
-      <td s-sort="name"><b>{{'NAME' | translate}}</b></td>
-      <td s-sort="email"><b>{{'EMAIL' | translate}}</b></td>
-      <td><b>{{'YEAR' | translate}}</b></td>
-      <td><b>{{'MONTH' | translate}}</b></td>
-      <td><b>{{'PLACE' | translate}}</b></td>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="data in vm.tableData">
-      <td>{{data._id}}</td>
-      <td>{{data.name}}</td>
-      <td>{{data.email}}</td>
-      <td>{{data.birthYear}}</td>
-      <td>{{data.birthMonth}}</td>
-      <td>{{data.birthPlace}}</td>
-    </tr>
-    </tbody>
-    <tfoot class="text-center">
-    <tr>
-      <td colspan="6" s-pagination></td>
-    </tr>
-    </tfoot>
-  </table>
+  <hr class="col-sm-12" style="padding: 0">
+  <div s-scroll style="height: 200px;width: 100%; overflow-y:scroll;">
+    <table id="table" class="table table-striped tableSection">
+      <thead>
+      <tr>
+        <td s-sort="_id"><b>{{'ID' | translate}}</b></td>
+        <td s-sort="name"><b>{{'NAME' | translate}}</b></td>
+        <td s-sort="email"><b>{{'EMAIL' | translate}}</b></td>
+        <td><b>{{'YEAR' | translate}}</b></td>
+        <td><b>{{'MONTH' | translate}}</b></td>
+        <td><b>{{'PLACE' | translate}}</b></td>
+      </tr>
+      </thead>
+      <tbody style="height: 100px;overflow: auto">
+      <tr ng-repeat="data in vm.tableData">
+        <td>{{data._id}}</td>
+        <td>{{data.name}}</td>
+        <td>{{data.email}}</td>
+        <td>{{data.birthYear}}</td>
+        <td>{{data.birthMonth}}</td>
+        <td>{{data.birthPlace}}</td>
+      </tr>
+      </tbody>
+      <!--<tfoot class="text-center">-->
+      <!--<tr>-->
+      <!--<td colspan="6" s-pagination></td>-->
+      <!--</tr>-->
+      <!--</tfoot>-->
+    </table>
+  </div>
 </div>
 <script src="bower_components/jquery/dist/jquery.js"></script>
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-translate/angular-translate.js"></script>
 <script src="bower_components/ngstorage/ngStorage.js"></script>
-<script src="bower_components/server-table/table/dist/table.js"></script>
+<script src="bower_components/server-table/table/source/table.js"></script>
 
 <script src="app.module.js"></script>
 <script src="translate.config.js"></script>
