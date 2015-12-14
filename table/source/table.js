@@ -200,7 +200,7 @@
       vm.numberOfPages = 0;
       vm.sort = {};
 
-      function getListFromServer(resetCurrentPage) {
+      function getListFromServer(resetCurrentPage, append) {
 
         if (resetCurrentPage) {
           vm.currentPage = 0;
@@ -217,7 +217,11 @@
 
         return sTableService.getDataFromServer($scope.listUrl, query)
           .then(function (result) {
-            vm.tableData = result;
+            if (append) {
+              vm.tableData = vm.tableData.concat(result);
+            } else {
+              vm.tableData = result;
+            }
           });
       }
 
@@ -248,11 +252,13 @@
           scope.countUrl = attrs.countUrl || sTableConfig.countUrl;
           scope.listUrl = attrs.listUrl || sTableConfig.listUrl;
           scope.hasCache = typeof attrs.sCache !== 'undefined';
+          scope.propagateScope = typeof attrs.propagateScope !== 'undefined';
 
           activate();
 
           function activate() {
             setCurrentPage();
+            propagateScope();
 
             ctrl.getPageCount()
               .then(function () {
@@ -267,6 +273,17 @@
             }
           }
 
+          function propagateScope() {
+            if (scope.propagateScope) {
+
+              scope.$watch('vm.tableData', function () {
+                scope.$parent.tableData = ctrl.tableData;
+              });
+
+              scope.$parent.getListFromServer = ctrl.getListFromServer;
+              scope.$parent.getPageCount = ctrl.getPageCount;
+            }
+          }
         }
       };
     }]);
@@ -498,7 +515,7 @@
           function resetSort() {
             for (var key in ctrl.sort) {
               if (ctrl.sort.hasOwnProperty(key) && key !== name) {
-                angular.element(document.querySelector('#' + key + '_sort'))[0].className = '';
+                angular.element('#' + key + '_sort')[0].className = '';
               }
             }
           }
@@ -535,4 +552,38 @@
         }
       };
     }]);
+
+  angular.module('serverTable')
+    .directive('sScroll', ['sTableConfig', function (sTableConfig) {
+      return {
+        restrict: 'A',
+        require: '^?sTable',
+        link: function (scope, element, attrs, ctrl) {
+
+          activate();
+
+          function activate() {
+            setItemsByPage();
+          }
+
+          var raw = element[0];
+
+          element.bind('scroll', function () {
+            if (raw.scrollTop + raw.offsetHeight >= raw.scrollHeight) {
+              if (ctrl.currentPage < ctrl.numberOfPages) {
+                ctrl.currentPage += 1;
+                ctrl.getListFromServer(false, true);
+              }
+            }
+          });
+
+          function setItemsByPage() {
+            if (!ctrl.actualItemsByPage) {
+              ctrl.actualItemsByPage = attrs.itemsByPage || sTableConfig.itemsByPage[1].value;
+            }
+          }
+        }
+      }
+    }]);
+
 }));
