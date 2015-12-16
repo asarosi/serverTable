@@ -29,6 +29,7 @@
     var year = Number(req.query.year);
     var month = Number(req.query.month);
     var searchText = req.query.searchText;
+    var onlyMissing = req.query.onlyMissing;
 
     var query = {};
 
@@ -57,6 +58,7 @@
       var month = Number(req.query.month);
       var searchText = req.query.searchText;
       var sort = JSON.parse(req.query.sort);
+      var onlyMissing = req.query.onlyMissing;
 
       var skipAndLimit = {};
 

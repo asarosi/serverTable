@@ -8,11 +8,15 @@
   <link rel="stylesheet" href="default.css">
 </head>
 <body ng-app="app" class="container-style">
-<div s-table class="form-inline" count-url="/count" list-url="/list" s-cache style="margin-top:25px">
+
+data:{{tableData}}
+
+<div s-table data="tableData" class="form-inline" count-url="/count" list-url="/list" s-cache style="margin-top:25px">
   <div class="col-sm-2" s-items-by-page></div>
   <div class="col-sm-2" s-year-filter start="2000" end="2020"></div>
-  <div class="col-sm-2 col-sm-offset-2" s-month-filter></div>
+  <div class="col-sm-2 col-sm-offset-1" s-month-filter></div>
   <div class="col-sm-2 col-sm-offset-1" s-search></div>
+  <div class="col-sm-2" s-only-missing></div>
   <hr class="col-sm-12" style="padding: 0">
   <div s-scroll style="height: 200px;width: 100%; overflow-y:scroll;">
     <table id="table" class="table table-striped tableSection">
