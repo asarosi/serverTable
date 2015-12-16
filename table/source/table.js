@@ -53,7 +53,19 @@
         '<input class="form-control" id="search" ng-model="vm.searchText"/>' +
         '</div>'
       );
+      $templateCache.put('template/servertable/onlyMissing.html',
+        '<div class="form-group">' +
+        '<label for="missing">{{"ONLY_MISSING" | translate}}:</label>' +
+        '<input type="checkbox" ng-model="vm.onlyMissing" id="missing">' +
+        '</div>'
+      );
     }]);
+
+  //angular.module('serverTable')
+  //  .config(['$localStorageProvider',
+  //    function ($localStorageProvider) {
+  //      $localStorageProvider.setKeyPrefix('NewPrefix');
+  //    }]);
 
   angular.module('serverTable')
     .constant('sTableConfig', {
@@ -88,7 +100,8 @@
       itemsByPageTemplateUrl: 'template/servertable/itemsByPage.html',
       yearFilterTemplateUrl: 'template/servertable/yearFilter.html',
       monthFilterTemplateUrl: 'template/servertable/monthFilter.html',
-      searchFieldTemplateUrl: 'template/servertable/search.html'
+      searchFieldTemplateUrl: 'template/servertable/search.html',
+      onlyMissingTemplateUrl: 'template/servertable/onlyMissing.html'
     });
 
   angular.module('serverTable')
@@ -160,6 +173,14 @@
           set: function (value) {
             sTableConfig.searchFieldTemplateUrl = value;
           }
+        },
+        onlyMissingTemplateUrl: {
+          get: function () {
+            return sTableConfig.onlyMissingTemplateUrl;
+          },
+          set: function (value) {
+            sTableConfig.onlyMissingTemplateUrl = value;
+          }
         }
       });
 
@@ -212,7 +233,8 @@
           month: vm.month,
           year: vm.year,
           searchText: vm.searchText,
-          sort: vm.sort
+          sort: vm.sort,
+          onlyMissing: vm.onlyMissing
         };
 
         return sTableService.getDataFromServer($scope.listUrl, query)
@@ -230,7 +252,8 @@
         var query = {
           month: vm.month,
           year: vm.year,
-          searchText: vm.searchText
+          searchText: vm.searchText,
+          onlyMissing: vm.onlyMissing
         };
 
         return sTableService.getDataFromServer($scope.countUrl, query)
@@ -252,6 +275,7 @@
           scope.countUrl = attrs.countUrl || sTableConfig.countUrl;
           scope.listUrl = attrs.listUrl || sTableConfig.listUrl;
           scope.hasCache = typeof attrs.sCache !== 'undefined';
+          scope.cachePrefix = scope.hasCache ? attrs.sCache : '';
           scope.propagateScope = typeof attrs.propagateScope !== 'undefined';
 
           activate();
@@ -352,7 +376,7 @@
 
             if (scope.hasCache) {
               var $localStorage = $injector.get('$localStorage');
-              ctrl.actualItemsByPage = $localStorage.actualItemsByPage || defaultItemsByPage;
+              ctrl.actualItemsByPage = $localStorage[scope.cachePrefix + 'actualItemsByPage'] || defaultItemsByPage;
             } else {
               ctrl.actualItemsByPage = attrs.itemsByPage || defaultItemsByPage;
             }
@@ -403,7 +427,7 @@
           function setYear() {
             if (scope.hasCache) {
               var $localStorage = $injector.get('$localStorage');
-              ctrl.year = $localStorage.year || new Date().getFullYear();
+              ctrl.year = $localStorage[scope.cachePrefix + 'year'] || new Date().getFullYear();
             } else {
               ctrl.year = ctrl.years[0].id;
             }
@@ -440,7 +464,7 @@
           function setMonth() {
             if (scope.hasCache) {
               var $localStorage = $injector.get('$localStorage');
-              ctrl.month = $localStorage.month || sTableConfig.months[0].id;
+              ctrl.month = $localStorage[scope.cachePrefix + 'month'] || sTableConfig.months[0].id;
             } else {
               ctrl.month = ctrl.months[0].id;
             }
@@ -465,12 +489,13 @@
         require: '^?sTable',
         link: function (scope) {
 
-          scope.$watchGroup(['vm.currentPage', 'vm.actualItemsByPage', 'vm.month', 'vm.year'], function (newVal) {
+          scope.$watchGroup(['vm.currentPage', 'vm.actualItemsByPage', 'vm.month', 'vm.year', 'vm.onlyMissing'], function (newVal) {
             // TODO [sarpad] currentPage cache not working
-            $localStorage.currentPage = newVal[0];
-            $localStorage.actualItemsByPage = newVal[1];
-            $localStorage.month = newVal[2];
-            $localStorage.year = newVal[3];
+            $localStorage[scope.cachePrefix + 'currentPage'] = newVal[0];
+            $localStorage[scope.cachePrefix + 'actualItemsByPage'] = newVal[1];
+            $localStorage[scope.cachePrefix + 'month'] = newVal[2];
+            $localStorage[scope.cachePrefix + 'year'] = newVal[3];
+            $localStorage[scope.cachePrefix + 'onlyMissing'] = newVal[4];
           });
 
         }
@@ -584,6 +609,44 @@
           }
         }
       }
+    }]);
+
+  angular.module('serverTable')
+    .directive('sOnlyMissing', ['$injector', 'sTableConfig', function ($injector, sTableConfig) {
+      return {
+        restrict: 'EA',
+        require: '^?sTable',
+        templateUrl: function () {
+          return sTableConfig.onlyMissingTemplateUrl;
+        },
+        link: function (scope, element, attrs, ctrl) {
+
+          activate();
+
+          function activate() {
+            setMissingFlag();
+          }
+
+          function setMissingFlag() {
+
+            if (scope.hasCache) {
+              var $localStorage = $injector.get('$localStorage');
+              ctrl.onlyMissing = $localStorage[scope.cachePrefix + 'onlyMissing'] || false;
+            } else {
+              ctrl.onlyMissing = true;
+            }
+          }
+
+          scope.$watch('vm.onlyMissing', function () {
+            // TODO [sarpad] all watch calls the server at the first load
+            ctrl.getPageCount()
+              .then(function () {
+                ctrl.getListFromServer(true);
+              });
+          });
+
+        }
+      };
     }]);
 
 }));
