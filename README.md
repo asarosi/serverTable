@@ -22,7 +22,7 @@ Include into the HTML
 ```
 Include the model into Angular module
 ```js
-angular.module('app', ['server-table'])
+angular.module('app', ['serverTable'])
 ...
 ```
 [**Example**] (https://github.com/asarosi/serverTable/tree/master/example)
